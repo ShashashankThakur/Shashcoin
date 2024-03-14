@@ -1,2 +1,11 @@
 # Shashcoin
-A minimal cryptocurrency built on top of a custom blockchain
+
+Shashcoin is a minimal cryptocurrency built on top of a custom blockchain
+
+## Indroduction
+
+lorem ipsum set amet dolor
+
+## Documentation
+
+lorem ipsum set amet dolor
