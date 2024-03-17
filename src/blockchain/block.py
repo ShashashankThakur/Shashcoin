@@ -4,6 +4,7 @@ import time
 
 class Block:
     def __init__(self, index, timestamp, data, previous_hash, nonce=0):
+        self.transactions = None
         self.index = index
         self.timestamp = timestamp
         self.data = data
