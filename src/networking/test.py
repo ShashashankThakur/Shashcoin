@@ -1,10 +1,20 @@
 from node import Node
+from src.blockchain.block import Block
+from src.blockchain.blockchain import Blockchain
 import time
 import threading
+import pickle
 
 
-def send_message(node, message):
-    node.send_message(message)
+def send_block(node, block):
+    node.send_message(pickle.dumps(block))
+
+
+def receive_block(node):
+    data = node.receive_message()
+    if data:
+        return pickle.loads(data)
+    return None
 
 
 # Start nodes
@@ -28,17 +38,29 @@ node3.connect_to_network([('localhost', 13000), ('localhost', 13001)])
 # Allow some time for connections to be established
 time.sleep(1)
 
-# Send messages between nodes
-message1 = "Hello from node1"
-message2 = "Hello from node2"
-message3 = "Hello from node3"
+# Create and broadcast blocks
+blockchain = Blockchain()
+block1 = Block(1, time.time(), "Data 1", "0")
+print(block1)
+block2 = Block(2, time.time(), "Data 2", block1.hash)
+print(block2)
+block3 = Block(3, time.time(), "Data 3", block2.hash)
+print(block3)
 
-threading.Thread(target=send_message, args=(node1, message1)).start()
-threading.Thread(target=send_message, args=(node2, message2)).start()
-threading.Thread(target=send_message, args=(node3, message3)).start()
+threading.Thread(target=send_block, args=(node1, block1)).start()
+threading.Thread(target=send_block, args=(node2, block2)).start()
+threading.Thread(target=send_block, args=(node3, block3)).start()
 
-# Allow some time for messages to be received
+# Allow some time for blocks to be received and processed
 time.sleep(1)
+
+# Print blockchain for each node
+print("Blockchain for Node 1:")
+print(block for block in node1.blockchain.chain)
+print("Blockchain for Node 2:")
+print(block for block in node2.blockchain.chain)
+print("Blockchain for Node 3:")
+print(block for block in node3.blockchain.chain)
 
 # Close the nodes
 node1.close()
