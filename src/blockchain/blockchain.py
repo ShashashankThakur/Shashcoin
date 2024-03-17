@@ -1,4 +1,4 @@
-from .block import Block
+from block import Block
 import time
 
 
@@ -41,6 +41,25 @@ class Blockchain:
             if current_block.previous_hash != previous_block.hash:
                 return False
 
+        return True
+
+    def validate_block(self, new_block):
+        """
+        Validate an incoming block
+        """
+        if new_block.index != self.get_latest_block().index + 1:
+            # Index of new block should be one greater than the index of the latest block
+            return False
+
+        if new_block.previous_hash != self.get_latest_block().hash:
+            # Previous hash of new block should match the hash of the latest block
+            return False
+
+        # Check if the new block's hash satisfies the difficulty requirement
+        if new_block.hash[:self.difficulty] != '0' * self.difficulty:
+            return False
+
+        # If all checks pass, the block is considered valid
         return True
 
 
