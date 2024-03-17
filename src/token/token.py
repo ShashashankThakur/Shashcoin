@@ -1,3 +1,8 @@
+#################
+#   SHASHCOIN   #
+#################
+
+
 class Token:
     def __init__(self, initial_supply):
         self.total_supply = initial_supply
