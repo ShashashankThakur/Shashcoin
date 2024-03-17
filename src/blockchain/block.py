@@ -21,13 +21,6 @@ class Block:
             self.nonce += 1
             self.hash = self.calculate_hash()
 
-    def update_block(self, hash):
-        """
-        Update the block's hash after mining
-        Used by proof_of_work.py
-        """
-        self.hash = hash
-
     def __str__(self):
         return (
             f"Index: {self.index}\n"
