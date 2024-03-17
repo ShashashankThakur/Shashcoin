@@ -1,51 +1,55 @@
 import socket
-import pickle
-from datetime import datetime
-
-
-def time():
-    # Return date and time in format
-    current_time = datetime.now()
-    formatted_time = current_time.strftime("[%Y-%m-%d %H:%M:%S] [SERVER]")
-    return formatted_time
-
-
-def log_print(*args, **kwargs):
-    # Print function to include timestamps for logs
-    print(f"{time()} ", end='')
-    print(*args, **kwargs)
-
+import threading
 
 class Node:
     def __init__(self, host, port):
-        self.socket = None
         self.host = host
         self.port = port
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.bind((self.host, self.port))
+        self.connections = []
 
     def start(self):
-        """
-        Start the node by creating a socket and listening for connections.
-        """
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind((self.host, self.port))
-        self.socket.listen()
-        log_print(f"Node listening on {self.host}:{self.port}")
-
+        self.sock.listen(5)
+        print(f"Node listening at {self.host}:{self.port}")
         while True:
-            conn, addr = self.socket.accept()
-            log_print(f"Connection established with {addr}")
-            data = conn.recv(4096)
-            if data:
-                message = pickle.loads(data)
-                log_print("Received message:", message)
-                # Process the received message
-                # Example: synchronize blockchain, add new block, etc.
-            conn.close()
+            client, address = self.sock.accept()
+            print(f"Connection established with {address}")
+            self.connections.append(client)
+            threading.Thread(target=self.handle_client, args=(client,)).start()
 
-    def send_message(self, host, port, message):
-        """
-        Send a message to another node.
-        """
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((host, port))
-            s.sendall(pickle.dumps(message))
+    def handle_client(self, client):
+        while True:
+            try:
+                data = client.recv(1024)
+                if data:
+                    print(f"Received: {data.decode()}")
+            except ConnectionResetError:
+                print("Connection closed by peer")
+                self.connections.remove(client)
+                client.close()
+                break
+
+    def send_message(self, message):
+        for conn in self.connections:
+            conn.sendall(message.encode())
+
+    def connect_to_network(self, other_nodes):
+        for node in other_nodes:
+            if node != (self.host, self.port):  # Avoid connecting to itself
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                try:
+                    sock.connect(node)
+                    self.connections.append(sock)
+                    print(f"Connected to {node}")
+                except ConnectionRefusedError:
+                    print(f"Connection to {node} refused")
+
+    def close(self):
+        for conn in self.connections:
+            conn.close()
+        self.sock.close()
+
+if __name__ == "__main__":
+    node = Node('localhost', 9999)
+    node.start()
