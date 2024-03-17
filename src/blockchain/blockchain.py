@@ -1,11 +1,11 @@
-from block import Block
+from .block import Block
 import time
 
 
 class Blockchain:
-    def __init__(self, difficulty):
+    def __init__(self):
         self.chain = [self.create_genesis_block()]
-        self.difficulty = difficulty
+        self.difficulty = 4
 
     def create_genesis_block(self):
         """
@@ -45,7 +45,7 @@ class Blockchain:
 
 
 if __name__ == "__main__":
-    blockchain = Blockchain(difficulty=4)
+    blockchain = Blockchain()
 
     # Add some blocks to the blockchain
     blockchain.add_block(Block(1, time.time(), "Transaction 1", ""))
